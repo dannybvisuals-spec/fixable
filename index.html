@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fixable — Fix it yourself</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --red:#e94560;--dark:#1a1a2e;--bg:#f7f7f8;--card:#fff;
+    --text:#1a1a2e;--sub:#666;--border:#e8e8e8;--easy:#1a7a3a;
+    --easy-bg:#eafbef;--medium:#8a5a00;--medium-bg:#fff8e6;
+    --hard:#9a2020;--hard-bg:#fef0f0;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto}
+  .screen{display:none;flex-direction:column;min-height:100vh}
+  .screen.active{display:flex}
+
+  /* HEADER */
+  .header{background:var(--dark);padding:16px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
+  .back-btn{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0 8px 0 0;line-height:1}
+  .logo{font-size:22px;font-weight:600;color:#fff;letter-spacing:-0.5px}
+  .logo span{color:var(--red)}
+  .header-sub{font-size:13px;color:rgba(255,255,255,0.6);margin-top:1px}
+
+  /* HOME */
+  .home-hero{background:var(--dark);padding:20px 20px 28px;text-align:center}
+  .home-logo{font-size:36px;font-weight:700;color:#fff;letter-spacing:-1px;margin-bottom:4px}
+  .home-logo span{color:var(--red)}
+  .home-tagline{font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:20px}
+  .search-box{background:#fff;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px}
+  .search-box input{border:none;outline:none;flex:1;font-size:15px;color:var(--text);background:transparent}
+  .search-box input::placeholder{color:#aaa}
+  .search-icon{color:#aaa;font-size:16px}
+
+  /* CATEGORIES */
+  .section-title{font-size:13px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:0.5px;padding:20px 20px 10px}
+  .cats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px}
+  .cat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:border-color 0.15s;text-align:left}
+  .cat-card:hover{border-color:var(--red)}
+  .cat-icon{font-size:24px;margin-bottom:6px}
+  .cat-name{font-size:14px;font-weight:600;color:var(--text)}
+  .cat-count{font-size:12px;color:var(--sub);margin-top:2px}
+
+  /* PROBLEM LIST */
+  .problems{padding:0 20px;display:flex;flex-direction:column;gap:10px;padding-bottom:30px}
+  .prob-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:border-color 0.15s}
+  .prob-card:hover{border-color:var(--red)}
+  .prob-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}
+  .prob-meta{display:flex;gap:10px;flex-wrap:wrap}
+  .pill{font-size:11px;font-weight:500;padding:3px 8px;border-radius:20px}
+  .pill.easy{background:var(--easy-bg);color:var(--easy)}
+  .pill.medium{background:var(--medium-bg);color:var(--medium)}
+  .pill.hard{background:var(--hard-bg);color:var(--hard)}
+  .pill.gray{background:#f0f0f0;color:#555}
+
+  /* PROBLEM DETAIL */
+  .detail-header{background:var(--dark);padding:24px 20px 20px}
+  .detail-cat{font-size:12px;color:var(--red);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+  .detail-title{font-size:22px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:14px}
+  .detail-pills{display:flex;gap:8px;flex-wrap:wrap}
+  .detail-pill{font-size:12px;padding:4px 12px;border-radius:20px;font-weight:500}
+  .detail-pill.easy{background:rgba(26,122,58,0.2);color:#7eeaa0}
+  .detail-pill.medium{background:rgba(138,90,0,0.2);color:#ffd580}
+  .detail-pill.hard{background:rgba(154,32,32,0.2);color:#ffaaaa}
+  .detail-pill.gray{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7)}
+
+  .start-btn{margin:20px;background:var(--red);color:#fff;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:600;cursor:pointer;width:calc(100% - 40px);transition:background 0.15s}
+  .start-btn:hover{background:#c8304a}
+
+  .detail-section{padding:0 20px 20px}
+  .detail-section-title{font-size:13px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;padding-top:20px;border-top:1px solid var(--border);margin-top:4px}
+  .detail-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
+  .detail-row:last-child{border-bottom:none}
+  .detail-label{color:var(--sub)}
+  .detail-val{font-weight:500;color:var(--text)}
+
+  /* TREE */
+  .tree-wrap{padding:20px;flex:1}
+  .tree-q{font-size:17px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:8px}
+  .tree-hint{font-size:13px;color:var(--sub);font-style:italic;margin-bottom:20px;line-height:1.5}
+  .tree-options{display:flex;flex-direction:column;gap:10px}
+  .tree-btn{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;font-size:14px;color:var(--text);transition:border-color 0.15s,background 0.15s;line-height:1.4;font-family:inherit}
+  .tree-btn:hover{border-color:var(--red);background:#fff8f9}
+  .tree-back{background:none;border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:13px;color:var(--sub);cursor:pointer;margin-top:16px;font-family:inherit}
+  .tree-back:hover{border-color:#999;color:var(--text)}
+  .progress{display:flex;gap:4px;padding:0 20px 16px}
+  .progress-dot{height:4px;flex:1;border-radius:2px;background:var(--border);transition:background 0.2s}
+  .progress-dot.done{background:var(--red)}
+
+  /* FIX */
+  .fix-wrap{padding:0 20px 30px;flex:1}
+  .fix-level{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-top:20px}
+  .fix-level.easy{color:var(--easy)}
+  .fix-level.medium{color:var(--medium)}
+  .fix-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:14px;line-height:1.3}
+  .fix-meta{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+  .fix-meta-item{font-size:13px;color:var(--sub);display:flex;align-items:center;gap:4px}
+  .fix-meta-item strong{color:var(--text)}
+  .fix-section{font-size:13px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;margin-top:20px}
+  .fix-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:4px}
+  .fix-step{display:flex;gap:12px;align-items:flex-start}
+  .step-num{background:var(--red);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;margin-top:1px}
+  .step-text{font-size:14px;color:var(--text);line-height:1.6}
+  .fix-materials{background:#f7f7f8;border-radius:10px;padding:12px 14px;font-size:13px;color:var(--sub);line-height:1.5;margin-bottom:4px}
+  .fix-materials strong{color:var(--text);display:block;margin-bottom:4px}
+  .fix-tip{border-left:3px solid var(--red);padding:10px 14px;font-size:13px;color:var(--sub);font-style:italic;line-height:1.5;margin-bottom:20px}
+  .restart-btn{background:var(--dark);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;width:100%;font-family:inherit;margin-top:10px}
+  .restart-btn:hover{background:#2a2a4e}
+
+  .empty{text-align:center;padding:40px 20px;color:var(--sub);font-size:14px}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="home-hero">
+    <div class="home-logo"><span>fix</span>able</div>
+    <div class="home-tagline">Fix it yourself — step by step</div>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Search a problem..." oninput="doSearch()">
+    </div>
+  </div>
+  <div id="search-results" style="display:none;padding:16px 20px 30px;flex-direction:column;gap:10px"></div>
+  <div id="home-content">
+    <div class="section-title">Categories</div>
+    <div class="cats" id="cats-grid"></div>
+    <div class="section-title" style="margin-top:8px">Recently Added</div>
+    <div class="problems" id="recent-list"></div>
+  </div>
+</div>
+
+<!-- CATEGORY -->
+<div class="screen" id="screen-cat">
+  <div class="header">
+    <button class="back-btn" onclick="showHome()">←</button>
+    <div><div class="logo" id="cat-title"></div><div class="header-sub" id="cat-sub"></div></div>
+  </div>
+  <div class="section-title">Problems</div>
+  <div class="problems" id="cat-problems"></div>
+</div>
+
+<!-- DETAIL -->
+<div class="screen" id="screen-detail">
+  <div class="header">
+    <button class="back-btn" id="detail-back-btn">←</button>
+    <div><div class="logo"><span>fix</span>able</div></div>
+  </div>
+  <div class="detail-header">
+    <div class="detail-cat" id="d-cat"></div>
+    <div class="detail-title" id="d-title"></div>
+    <div class="detail-pills" id="d-pills"></div>
+  </div>
+  <button class="start-btn" id="start-tree-btn">🔧 Start Troubleshooting</button>
+  <div class="detail-section">
+    <div class="detail-section-title">At a Glance</div>
+    <div class="detail-row"><span class="detail-label">Difficulty</span><span class="detail-val" id="d-diff"></span></div>
+    <div class="detail-row"><span class="detail-label">Average Time</span><span class="detail-val" id="d-time"></span></div>
+    <div class="detail-row"><span class="detail-label">Average Cost</span><span class="detail-val" id="d-cost"></span></div>
+    <div class="detail-row"><span class="detail-label">Category</span><span class="detail-val" id="d-cat2"></span></div>
+  </div>
+</div>
+
+<!-- TREE -->
+<div class="screen" id="screen-tree">
+  <div class="header">
+    <button class="back-btn" onclick="treeBack()">←</button>
+    <div><div class="logo"><span>fix</span>able</div><div class="header-sub">Troubleshooting</div></div>
+  </div>
+  <div class="progress" id="tree-progress"></div>
+  <div class="tree-wrap">
+    <div class="tree-q" id="tree-q"></div>
+    <div class="tree-hint" id="tree-hint"></div>
+    <div class="tree-options" id="tree-options"></div>
+    <button class="tree-back" onclick="treeBack()">← Different answer</button>
+  </div>
+</div>
+
+<!-- FIX -->
+<div class="screen" id="screen-fix">
+  <div class="header">
+    <button class="back-btn" onclick="show('screen-tree')">←</button>
+    <div><div class="logo"><span>fix</span>able</div><div class="header-sub">Your Fix</div></div>
+  </div>
+  <div class="fix-wrap">
+    <div class="fix-level" id="fix-level"></div>
+    <div class="fix-title" id="fix-title"></div>
+    <div class="fix-meta" id="fix-meta"></div>
+    <div class="fix-section">What you need</div>
+    <div class="fix-materials" id="fix-materials"></div>
+    <div class="fix-section">Steps</div>
+    <div class="fix-steps" id="fix-steps"></div>
+    <div class="fix-section">Pro tip</div>
+    <div class="fix-tip" id="fix-tip"></div>
+    <button class="restart-btn" onclick="restartTree()">↩ Start over</button>
+  </div>
+</div>
+
+<script>
+const CATS = [
+  {id:"plumbing",name:"Plumbing",icon:"🚿",color:"#3B8BD4"},
+  {id:"car",name:"Car",icon:"🚗",color:"#E94560"},
+  {id:"electrical",name:"Electrical",icon:"⚡",color:"#F5A623"},
+  {id:"appliances",name:"Appliances",icon:"🧺",color:"#7B68EE"},
+  {id:"hvac",name:"HVAC",icon:"❄️",color:"#1D9E75"},
+  {id:"drywall",name:"Drywall & Paint",icon:"🪣",color:"#888"},
+];
+
+const PROBLEMS = [
+  {id:"PLM-001",cat:"plumbing",catName:"Plumbing",title:"Toilet won't stop running",diff:"Easy",time:"15–30 min",cost:"$0–$20",keywords:"toilet running water flapper float chain handle",tree:"toilet"},
+  {id:"PLM-002",cat:"plumbing",catName:"Plumbing",title:"Toilet won't flush properly",diff:"Easy",time:"10–20 min",cost:"$0–$15",keywords:"toilet flush weak clog handle",tree:null},
+  {id:"PLM-003",cat:"plumbing",catName:"Plumbing",title:"Sink draining slowly",diff:"Easy",time:"15–30 min",cost:"$0–$10",keywords:"sink slow drain clog hair soap",tree:null},
+  {id:"PLM-004",cat:"plumbing",catName:"Plumbing",title:"Leaky faucet dripping",diff:"Medium",time:"30–60 min",cost:"$5–$25",keywords:"faucet drip leak washer cartridge",tree:null},
+  {id:"CAR-001",cat:"car",catName:"Car",title:"Grinding noise when braking",diff:"Medium",time:"1–2 hrs",cost:"$30–$150",keywords:"brakes grinding squealing pads rotors",tree:null},
+  {id:"CAR-002",cat:"car",catName:"Car",title:"Car won't start",diff:"Easy",time:"15–45 min",cost:"$0–$200",keywords:"battery starter alternator dead",tree:null},
+  {id:"CAR-003",cat:"car",catName:"Car",title:"Check engine light on",diff:"Medium",time:"30–60 min",cost:"$0–$20",keywords:"check engine OBD code scanner",tree:null},
+  {id:"ELC-001",cat:"electrical",catName:"Electrical",title:"Outlet not working",diff:"Easy",time:"10–20 min",cost:"$0–$15",keywords:"outlet dead GFCI breaker tripped",tree:null},
+  {id:"ELC-002",cat:"electrical",catName:"Electrical",title:"Light switch not working",diff:"Easy",time:"15–30 min",cost:"$0–$10",keywords:"switch dead wiring breaker",tree:null},
+  {id:"APL-001",cat:"appliances",catName:"Appliances",title:"Washer not spinning",diff:"Medium",time:"30–60 min",cost:"$0–$50",keywords:"washer spin lid switch belt motor",tree:null},
+  {id:"APL-002",cat:"appliances",catName:"Appliances",title:"Refrigerator not cooling",diff:"Medium",time:"30–60 min",cost:"$0–$30",keywords:"fridge warm compressor coils thermostat",tree:null},
+  {id:"HVA-001",cat:"hvac",catName:"HVAC",title:"AC not cooling",diff:"Medium",time:"15–45 min",cost:"$0–$20",keywords:"AC warm refrigerant filter thermostat",tree:null},
+  {id:"DRY-001",cat:"drywall",catName:"Drywall & Paint",title:"Hole in drywall",diff:"Easy",time:"1–2 hrs",cost:"$5–$20",keywords:"drywall hole patch repair paint",tree:null},
+];
+
+const TREES = {
+  toilet: {
+    q:"Where is the water going?",
+    hint:"Lift the tank lid and look inside while it's running.",
+    options:[
+      {label:"Water trickling into the bowl",next:{
+        q:"Is the handle or lever sticking down?",
+        hint:"Press the handle — does it stay down or feel sticky?",
+        options:[
+          {label:"Yes — handle feels stuck or loose",fix:"FIX-A"},
+          {label:"No — handle is fine",next:{
+            q:"Is the chain tangled, too long, or caught under the flapper?",
+            hint:"Look at the chain connecting the handle arm to the rubber flapper at the bottom.",
+            options:[
+              {label:"Yes — chain looks tangled or too long",fix:"FIX-B"},
+              {label:"No — chain looks fine",fix:"FIX-C"}
+            ]
+          }}
+        ]
+      }},
+      {label:"Water level too high — spilling into overflow tube",next:{
+        q:"Is the float set too high?",
+        hint:"Water should sit about 1 inch below the top of the overflow tube.",
+        options:[
+          {label:"Yes — water is above the overflow tube",fix:"FIX-D"},
+          {label:"No — float looks fine",next:{
+            q:"Is the fill valve hissing after the tank is full?",
+            hint:"After a flush, does hissing continue once the tank is full?",
+            options:[
+              {label:"Yes — hissing continues after tank fills",fix:"FIX-E"},
+              {label:"No — fill valve seems fine",fix:"FIX-F"}
+            ]
+          }}
+        ]
+      }}
+    ]
+  }
+};
+
+const FIXES = {
+  "FIX-A":{level:"easy",title:"Fix the Handle or Lever",time:"10 min",cost:"$0–$8",materials:"Adjustable pliers · Replacement handle ($5–$8) if broken",steps:["Remove the tank lid and set it aside safely.","Find the nut connecting the handle to the flush arm inside the tank.","Tighten the nut with pliers — it's reverse-threaded, so turn counterclockwise to tighten.","If the handle is cracked or broken, bring it to a hardware store to match the size.","Reinstall and test flush."],tip:"The nut inside the tank is reverse-threaded — tighten it by turning counterclockwise."},
+  "FIX-B":{level:"easy",title:"Adjust the Chain Length",time:"5 min",cost:"$0",materials:"None — no parts needed",steps:["Lift the tank lid.","Unhook the chain from the handle arm.","Move it to a higher link so it has only about half an inch of slack.","Make sure the chain isn't looping under the flapper — it should hang freely.","Flush to test. The flapper should lift cleanly and drop flat."],tip:"Too much slack means the flapper won't lift fully. Too tight means it never seals. Half an inch of slack is the sweet spot."},
+  "FIX-C":{level:"easy",title:"Replace the Flapper",time:"15–20 min",cost:"$5–$15",materials:"Replacement flapper ($5–$15) · Adjustable pliers · Towel",steps:["Turn off the water valve behind or below the toilet.","Flush to empty the tank.","Unhook the old flapper from the two pegs on the overflow tube and detach the chain.","Bring the old flapper to the hardware store to match the size exactly.","Snap the new flapper onto the pegs and re-attach the chain with half an inch of slack.","Turn the water back on, let the tank fill, and test flush."],tip:"Always bring your old flapper to match it — sizes vary by brand. A wrong size won't seal no matter how new it is."},
+  "FIX-D":{level:"easy",title:"Adjust the Float Height",time:"10 min",cost:"$0",materials:"None — no parts needed",steps:["Locate the float — it's either a ball on an arm or a cup that slides along the fill valve.","Ball float: bend the arm slightly downward to lower the shutoff level.","Cup float: find the adjustment screw or clip on the fill valve and turn counterclockwise to lower it.","Flush and let the tank refill — water should stop about 1 inch below the top of the overflow tube.","Repeat adjustments until the water stops at the right level."],tip:"The target water level is usually marked with a line inside the tank. If not, 1 inch below the overflow tube is your guide."},
+  "FIX-E":{level:"medium",title:"Replace the Fill Valve",time:"30–45 min",cost:"$10–$20",materials:"Fill valve ($10–$20, Fluidmaster 400A recommended) · Adjustable pliers · Towel or sponge",steps:["Turn off the water supply valve behind the toilet.","Flush to drain the tank completely.","Use a towel or sponge to remove remaining water.","Disconnect the water supply line from the bottom of the tank.","Unscrew the locknut under the tank holding the fill valve in place.","Pull out the old fill valve.","Insert the new fill valve — Fluidmaster 400A fits most toilets.","Tighten the locknut hand-tight plus a half turn — don't overtighten.","Reconnect the supply line, turn water back on, and set the water level per instructions."],tip:"The Fluidmaster 400A fits almost every toilet made in the last 30 years and costs about $12 at any hardware store."},
+  "FIX-F":{level:"easy",title:"Reposition the Refill Tube",time:"5 min",cost:"$0",materials:"None — no parts needed",steps:["Find the small plastic refill tube running from the fill valve into the overflow tube.","Check if the end of the tube is submerged below the water level in the tank.","If yes, pull it upward and clip it to the side of the overflow tube above the waterline.","A submerged refill tube creates a siphon that constantly drains water — repositioning breaks the siphon.","Flush to test."],tip:"This is one of the most overlooked causes of a running toilet. The fix takes 30 seconds once you know what to look for."},
+};
+
+let currentProb = null;
+let treeHistory = [];
+let currentNode = null;
+let fromCat = null;
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function showHome(){
+  document.getElementById('search-input').value='';
+  document.getElementById('search-results').style.display='none';
+  document.getElementById('home-content').style.display='';
+  show('screen-home');
+}
+
+function buildHome(){
+  const grid = document.getElementById('cats-grid');
+  CATS.forEach(c=>{
+    const count = PROBLEMS.filter(p=>p.cat===c.id).length;
+    const el = document.createElement('div');
+    el.className='cat-card';
+    el.innerHTML=`<div class="cat-icon">${c.icon}</div><div class="cat-name">${c.name}</div><div class="cat-count">${count} problem${count!==1?'s':''}</div>`;
+    el.onclick=()=>showCat(c);
+    grid.appendChild(el);
+  });
+  const recent = document.getElementById('recent-list');
+  PROBLEMS.slice(0,4).forEach(p=>{
+    recent.appendChild(makeProbCard(p,'home'));
+  });
+}
+
+function makeProbCard(p, from){
+  const el = document.createElement('div');
+  el.className='prob-card';
+  el.innerHTML=`<div class="prob-title">${p.title}</div>
+    <div class="prob-meta">
+      <span class="pill ${p.diff.toLowerCase()}">${p.diff}</span>
+      <span class="pill gray">⏱ ${p.time}</span>
+      <span class="pill gray">💰 ${p.cost}</span>
+    </div>`;
+  el.onclick=()=>showDetail(p, from);
+  return el;
+}
+
+function showCat(c){
+  fromCat = c;
+  document.getElementById('cat-title').innerHTML=`<span style="color:var(--red)">fix</span>able`;
+  document.getElementById('cat-sub').textContent=c.name;
+  const list = document.getElementById('cat-problems');
+  list.innerHTML='';
+  const probs = PROBLEMS.filter(p=>p.cat===c.id);
+  probs.forEach(p=>list.appendChild(makeProbCard(p,'cat')));
+  show('screen-cat');
+}
+
+function showDetail(p, from){
+  currentProb = p;
+  document.getElementById('d-cat').textContent=p.catName;
+  document.getElementById('d-title').textContent=p.title;
+  document.getElementById('d-cat2').textContent=p.catName;
+  document.getElementById('d-diff').textContent=p.diff;
+  document.getElementById('d-time').textContent=p.time;
+  document.getElementById('d-cost').textContent=p.cost;
+  const pills = document.getElementById('d-pills');
+  pills.innerHTML=`<span class="detail-pill ${p.diff.toLowerCase()}">${p.diff}</span>
+    <span class="detail-pill gray">⏱ ${p.time}</span>
+    <span class="detail-pill gray">💰 ${p.cost}</span>`;
+  const backBtn = document.getElementById('detail-back-btn');
+  backBtn.onclick = from==='cat' ? ()=>show('screen-cat') : showHome;
+  const startBtn = document.getElementById('start-tree-btn');
+  if(p.tree){
+    startBtn.style.display='';
+    startBtn.onclick=()=>startTree(p.tree);
+  } else {
+    startBtn.style.display='none';
+  }
+  show('screen-detail');
+}
+
+function startTree(treeId){
+  treeHistory=[];
+  currentNode = TREES[treeId];
+  renderTree();
+  show('screen-tree');
+}
+
+function renderTree(){
+  document.getElementById('tree-q').textContent=currentNode.q;
+  document.getElementById('tree-hint').textContent=currentNode.hint||'';
+  const opts = document.getElementById('tree-options');
+  opts.innerHTML='';
+  currentNode.options.forEach((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='tree-btn';
+    btn.textContent=o.label;
+    btn.onclick=()=>chooseOption(o);
+    opts.appendChild(btn);
+  });
+  const prog = document.getElementById('tree-progress');
+  prog.innerHTML='';
+  for(let i=0;i<Math.max(treeHistory.length+1,3);i++){
+    const d=document.createElement('div');
+    d.className='progress-dot'+(i<treeHistory.length?' done':'');
+    prog.appendChild(d);
+  }
+}
+
+function chooseOption(o){
+  treeHistory.push(currentNode);
+  if(o.fix){
+    showFix(o.fix);
+  } else {
+    currentNode=o.next;
+    renderTree();
+  }
+}
+
+function treeBack(){
+  if(treeHistory.length===0){show('screen-detail');return;}
+  currentNode=treeHistory.pop();
+  renderTree();
+}
+
+function showFix(fixId){
+  const f=FIXES[fixId];
+  document.getElementById('fix-level').textContent=f.level==='easy'?'✓ Easy fix':'⚠ Moderate fix';
+  document.getElementById('fix-level').className='fix-level '+f.level;
+  document.getElementById('fix-title').textContent=f.title;
+  document.getElementById('fix-meta').innerHTML=`<div class="fix-meta-item">⏱ <strong>${f.time}</strong></div><div class="fix-meta-item">💰 <strong>${f.cost}</strong></div>`;
+  document.getElementById('fix-materials').innerHTML=`<strong>What you need:</strong>${f.materials}`;
+  const steps=document.getElementById('fix-steps');
+  steps.innerHTML='';
+  f.steps.forEach((s,i)=>{
+    const el=document.createElement('div');
+    el.className='fix-step';
+    el.innerHTML=`<span class="step-num">${i+1}</span><span class="step-text">${s}</span>`;
+    steps.appendChild(el);
+  });
+  document.getElementById('fix-tip').textContent=f.tip;
+  show('screen-fix');
+}
+
+function restartTree(){
+  treeHistory=[];
+  currentNode=TREES[currentProb.tree];
+  renderTree();
+  show('screen-tree');
+}
+
+function doSearch(){
+  const q=document.getElementById('search-input').value.toLowerCase().trim();
+  const results=document.getElementById('search-results');
+  const homeContent=document.getElementById('home-content');
+  if(!q){
+    results.style.display='none';
+    homeContent.style.display='';
+    return;
+  }
+  homeContent.style.display='none';
+  results.style.display='flex';
+  results.innerHTML='';
+  const matches=PROBLEMS.filter(p=>
+    p.title.toLowerCase().includes(q)||
+    p.keywords.toLowerCase().includes(q)||
+    p.catName.toLowerCase().includes(q)
+  );
+  if(matches.length===0){
+    results.innerHTML='<div class="empty">No results for "'+q+'"<br><br>Try different keywords.</div>';
+  } else {
+    matches.forEach(p=>results.appendChild(makeProbCard(p,'home')));
+  }
+}
+
+buildHome();
+</script>
+</body>
+</html>
