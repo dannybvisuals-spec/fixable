@@ -113,6 +113,52 @@
 </head>
 <body>
 
+<!-- PASSWORD GATE -->
+<div id="gate" style="display:none;position:fixed;inset:0;background:#1a1a2e;z-index:9999;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px">
+  <div style="font-size:36px;font-weight:700;color:#fff;letter-spacing:-1px;margin-bottom:6px"><span style="color:#e94560">fix</span>able</div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:40px;letter-spacing:0.5px">PRIVATE BETA</div>
+  <div style="width:100%;max-width:320px">
+    <input id="gate-input" type="password" placeholder="Enter access password"
+      style="width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#fff;font-size:15px;outline:none;font-family:inherit;margin-bottom:12px;box-sizing:border-box"
+      onkeydown="if(event.key==='Enter')checkPass()">
+    <div id="gate-err" style="color:#e94560;font-size:13px;text-align:center;min-height:18px;margin-bottom:10px"></div>
+    <button onclick="checkPass()"
+      style="width:100%;background:#e94560;color:#fff;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit">
+      Access Fixable
+    </button>
+  </div>
+  <div style="margin-top:32px;font-size:12px;color:rgba(255,255,255,0.2);text-align:center;line-height:1.6">
+    This is a password-protected private beta.<br>Access is granted by invitation only.
+  </div>
+</div>
+<script>
+  (function(){
+    var PASS = 'Fixable2026';
+    var gate = document.getElementById('gate');
+    if(sessionStorage.getItem('fx_auth') === '1'){
+      gate.style.display = 'none';
+    } else {
+      gate.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+  })();
+  function checkPass(){
+    var PASS = 'Fixable2026';
+    var val = document.getElementById('gate-input').value;
+    if(val === PASS){
+      sessionStorage.setItem('fx_auth','1');
+      var gate = document.getElementById('gate');
+      gate.style.opacity='0';
+      gate.style.transition='opacity 0.3s';
+      setTimeout(function(){ gate.style.display='none'; document.body.style.overflow=''; },300);
+    } else {
+      document.getElementById('gate-err').textContent='Incorrect password. Please try again.';
+      document.getElementById('gate-input').value='';
+      document.getElementById('gate-input').focus();
+    }
+  }
+</script>
+
 <!-- HOME -->
 <div class="screen active" id="screen-home">
   <div class="home-hero">
